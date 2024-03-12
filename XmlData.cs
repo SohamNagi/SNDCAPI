@@ -6,45 +6,45 @@ namespace SNDCAPI;
 public class session
 {
     [XmlElement("data")]
-    public data? data { get; set; }
+    public data data { get; set; }
 }
 
-public class data
+public partial class data
 {
     [XmlElement("policy")]
-    public policy? policy { get; set; }
+    public policy policy { get; set; }
 
     [XmlElement("currentTransactionType")]
-    public string? currentTransactionType { get; set; }
+    public string currentTransactionType { get; set; }
 }
 
-public class policy
+public partial class policy
 {
     [XmlElement("brandFlag")]
-    public string? brandFlag { get; set; }
+    public string brandFlag { get; set; }
 
     [XmlElement("policyNumber")]
-    public string? policyNumber { get; set; }
+    public string policyNumber { get; set; }
 
     [XmlElement("workbenchCaseId")]
-    public string? workbenchCaseId { get; set; }
+    public string workbenchCaseId { get; set; }
 
     [XmlElement("organizationalUnitDropdown")]
-    public string? organizationalUnitDropdown { get; set; }
+    public string organizationalUnitDropdown { get; set; }
 
     [XmlElement("marketDimension")]
-    public string? marketDimension { get; set; }
+    public string marketDimension { get; set; }
 }
 
 public class FormData
 {
     public const string u_application = "Wave";
-    public string? u_policynumber { get; set; }
-    public string? u_caseid { get; set; }
-    public string? u_brand { get; set; }
-    public string? u_businessunit { get; set; }
-    public string? u_marketdimension { get; set; }
-    public string? u_transaction { get; set; }
+    public string u_policynumber { get; set; }
+    public string u_caseid { get; set; }
+    public string u_brand { get; set; }
+    public string u_businessunit { get; set; }
+    public string u_marketdimension { get; set; }
+    public string u_transaction { get; set; }
     public FormData(string policyNumber, string caseID, string brand, string businessUnit, string marketDimension, string transaction)
     {
         u_policynumber = policyNumber;
@@ -160,7 +160,7 @@ public class Result
     public string category { get; set; }
 }
 
-public class Root
+public class jsonRoot
 {
     public Result result { get; set; }
 }

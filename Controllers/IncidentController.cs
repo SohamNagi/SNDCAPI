@@ -54,8 +54,8 @@ public class IncidentController : ControllerBase
                 if (response.IsSuccessStatusCode)
                 {
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    var incident = JsonSerializer.Deserialize<Root>(responseBody);
-                    return Ok($"{_serviceNowUrl}{"/incident.do?number="}{incident.result.number}");
+                    var incident = JsonSerializer.Deserialize<jsonRoot>(responseBody);
+                    return Ok($"{_serviceNowUrl}{"/nav_to.do?uri=incident.do?sysparm_query=number%3D"}{incident.result.number}");
 
                 }
                 else
