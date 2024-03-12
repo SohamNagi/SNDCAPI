@@ -3,37 +3,37 @@
 namespace SNDCAPI;
 
 [Serializable, XmlRoot("session")]
-public class Session
+public class session
 {
     [XmlElement("data")]
-    public Data? Data { get; set; }
+    public data? data { get; set; }
 }
 
-public class Data
+public class data
 {
     [XmlElement("policy")]
-    public Policy? Policy { get; set; }
+    public policy? policy { get; set; }
 
-    [XmlElement("CurrentTransactionType")]
-    public string? CurrentTransactionType { get; set; }
+    [XmlElement("currentTransactionType")]
+    public string? currentTransactionType { get; set; }
 }
 
-public class Policy
+public class policy
 {
-    [XmlElement("BrandFlag")]
-    public string? BrandFlag { get; set; }
+    [XmlElement("brandFlag")]
+    public string? brandFlag { get; set; }
 
-    [XmlElement("PolicyNumber")]
-    public string? PolicyNumber { get; set; }
+    [XmlElement("policyNumber")]
+    public string? policyNumber { get; set; }
 
-    [XmlElement("WorkbenchCaseId")]
-    public string? WorkbenchCaseId { get; set; }
+    [XmlElement("workbenchCaseId")]
+    public string? workbenchCaseId { get; set; }
 
-    [XmlElement("OrganizationalUnitDropdown")]
-    public string? OrganizationalUnitDropdown { get; set; }
+    [XmlElement("organizationalUnitDropdown")]
+    public string? organizationalUnitDropdown { get; set; }
 
-    [XmlElement("MarketDimension")]
-    public string? MarketDimension { get; set; }
+    [XmlElement("marketDimension")]
+    public string? marketDimension { get; set; }
 }
 
 public class FormData

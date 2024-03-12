@@ -22,22 +22,22 @@ public class IncidentController : ControllerBase
         _password = configuration["Password"]!;
     }
 
-    
+
     [HttpPost]
     [Consumes("application/xml")]
-    public async Task<IActionResult> PostIncident([FromBody] Session session)
+    public async Task<IActionResult> PostIncident([FromBody] session session)
     {
         try
         {
 
             // Extract the relevant data and flatten to json
             FormData flatData = new FormData();
-            flatData.u_brand = session.Data.Policy.BrandFlag;
-            flatData.u_policynumber = session.Data.Policy.PolicyNumber;
-            flatData.u_caseid = session.Data.Policy.WorkbenchCaseId;
-            flatData.u_businessunit = session.Data.Policy.OrganizationalUnitDropdown;
-            flatData.u_marketdimension = session.Data.Policy.MarketDimension;
-            flatData.u_transaction = session.Data.CurrentTransactionType;
+            flatData.u_brand = session.data.policy.brandFlag;
+            flatData.u_policynumber = session.data.policy.policyNumber;
+            flatData.u_caseid = session.data.policy.workbenchCaseId;
+            flatData.u_businessunit = session.data.policy.organizationalUnitDropdown;
+            flatData.u_marketdimension = session.data.policy.marketDimension;
+            flatData.u_transaction = session.data.currentTransactionType;
 
             // Convert Json to string
             string jsonData = JsonSerializer.Serialize(flatData);
@@ -63,13 +63,13 @@ public class IncidentController : ControllerBase
                     return StatusCode((int)response.StatusCode,
                                   "Error sending data: " + await response.Content.ReadAsStringAsync());
                 }
-            }      
+            }
         }
         catch (Exception ex)
         {
             return BadRequest("Error processing data: " + ex.Message);
         }
     }
-    
+
 }
 
