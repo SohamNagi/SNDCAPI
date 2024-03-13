@@ -9,7 +9,7 @@ public class session
     public data data { get; set; }
 }
 
-public partial class data
+public class data
 {
     [XmlElement("policy")]
     public policy policy { get; set; }
@@ -18,7 +18,7 @@ public partial class data
     public string currentTransactionType { get; set; }
 }
 
-public partial class policy
+public class policy
 {
     [XmlElement("brandFlag")]
     public string brandFlag { get; set; }

@@ -3,11 +3,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Xml.Serialization;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.XPath;
-using System.Diagnostics;
-
 
 namespace SNDCAPI.Controllers;
 
@@ -15,6 +10,7 @@ namespace SNDCAPI.Controllers;
 [Route("[controller]")]
 public class IncidentController : ControllerBase
 {
+
     private readonly string _serviceNowUrl;
     private readonly string _username;
     private readonly string _password;
@@ -28,24 +24,21 @@ public class IncidentController : ControllerBase
 
 
     [HttpPost]
-    public async Task<IActionResult> PostIncident()
+    [Consumes("application/xml")]
+    public async Task<IActionResult> PostIncident([FromBody] session session)
     {
         try
         {
-            FormData flatData = new FormData();
-            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-            {
-                string xmlString = reader.ReadToEndAsync().Result;
 
-                // Create an XDocument
-                XDocument xmlDoc = XDocument.Parse(xmlString);
-                flatData.u_brand = xmlDoc.XPathSelectElement("/session/data/policy/BrandFlag").Value;
-                flatData.u_policynumber = xmlDoc.XPathSelectElement("session/data/policy/PolicyNumber").Value;
-                flatData.u_caseid = xmlDoc.XPathSelectElement("session/data/policy/WorkbenchCaseId").Value;
-                flatData.u_businessunit = xmlDoc.XPathSelectElement("/session/data/policy/OrganizationalUnitDropdown").Value;
-                flatData.u_marketdimension = xmlDoc.XPathSelectElement("/session/data/policy/MarketDimension").Value;
-                flatData.u_transaction = xmlDoc.XPathSelectElement("/session/data/CurrentTransactionType").Value;
-            }
+            // Extract the relevant data and flatten to json
+            FormData flatData = new FormData();
+            flatData.u_brand = session.data.policy.brandFlag;
+            flatData.u_policynumber = session.data.policy.policyNumber;
+            flatData.u_caseid = session.data.policy.workbenchCaseId;
+            flatData.u_businessunit = session.data.policy.organizationalUnitDropdown;
+            flatData.u_marketdimension = session.data.policy.marketDimension;
+            flatData.u_transaction = session.data.currentTransactionType;
+
             // Convert Json to string
             string jsonData = JsonSerializer.Serialize(flatData);
 
@@ -63,6 +56,7 @@ public class IncidentController : ControllerBase
                     var responseBody = await response.Content.ReadAsStringAsync();
                     var incident = JsonSerializer.Deserialize<jsonRoot>(responseBody);
                     return Ok($"{_serviceNowUrl}{"/nav_to.do?uri=incident.do?sysparm_query=number%3D"}{incident.result.number}");
+
                 }
                 else
                 {

@@ -1,0 +1,12 @@
+<session>
+    <data>
+        <policy>
+            <BrandFlag>NBI</BrandFlag>
+            <PolicyNumber>P04126499</PolicyNumber>
+            <WorkbenchCaseId>MT23N142734</WorkbenchCaseId>
+            <OrganizationalUnitDropdown>Atlantic</OrganizationalUnitDropdown>
+            <MarketDimension>SmallBusiness</MarketDimension>
+        </policy>
+        <CurrentTransactionType>Endorse</CurrentTransactionType>
+    </data>
+</session>
