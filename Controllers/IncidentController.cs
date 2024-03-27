@@ -29,10 +29,21 @@ public class IncidentController : ControllerBase
     {
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            HttpContext.Session.SetString("StoredXml", reader.ReadToEndAsync().Result);
-        }
+            string xmldata = reader.ReadToEndAsync().Result;
+            FormData flatData = new FormData();
+            // Create an XDocument
+            XDocument xmlDoc = XDocument.Parse(xmldata);
+            flatData.u_brand = xmlDoc.XPathSelectElement("/session/data/policy/BrandFlag").Value;
+            flatData.u_policynumber = xmlDoc.XPathSelectElement("session/data/policy/PolicyNumber").Value;
+            flatData.u_caseid = xmlDoc.XPathSelectElement("session/data/policy/WorkbenchCaseId").Value;
+            flatData.u_businessunit = xmlDoc.XPathSelectElement("/session/data/policy/OrganizationalUnitDropdown").Value;
+            flatData.u_marketdimension = xmlDoc.XPathSelectElement("/session/data/policy/MarketDimension").Value;
+            flatData.u_transaction = xmlDoc.XPathSelectElement("/session/data/CurrentTransactionType").Value;
 
-        var storedData = HttpContext.Session.GetString("StoredXml");
+            // Convert Json to string
+            string jsonData = JsonSerializer.Serialize(flatData);
+            HttpContext.Session.SetString("StoredData", jsonData);
+        }
 
         // Construct the OAuth URL with necessary parameters
         var state = RandomString(5); // Generating a unique state value for each request for CSRF protection
@@ -43,7 +54,7 @@ public class IncidentController : ControllerBase
         HttpContext.Session.SetString("State", state);
 
         // Redirect the user to the OAuth provider's authorization page
-        return Redirect(authorizationUrl);
+        return Ok(authorizationUrl);
     }
 
     [HttpGet("OAuthCallback")]
@@ -56,30 +67,17 @@ public class IncidentController : ControllerBase
         }
 
         // Retrieve any stored session data
-        var storedData = HttpContext.Session.GetString("StoredXml");
+        var storedData = HttpContext.Session.GetString("StoredData");
 
         // Using the access token to make Table API call
         try
         {
-            FormData flatData = new FormData();
-            // Create an XDocument
-            XDocument xmlDoc = XDocument.Parse(storedData);
-            flatData.u_brand = xmlDoc.XPathSelectElement("/session/data/policy/BrandFlag").Value;
-            flatData.u_policynumber = xmlDoc.XPathSelectElement("session/data/policy/PolicyNumber").Value;
-            flatData.u_caseid = xmlDoc.XPathSelectElement("session/data/policy/WorkbenchCaseId").Value;
-            flatData.u_businessunit = xmlDoc.XPathSelectElement("/session/data/policy/OrganizationalUnitDropdown").Value;
-            flatData.u_marketdimension = xmlDoc.XPathSelectElement("/session/data/policy/MarketDimension").Value;
-            flatData.u_transaction = xmlDoc.XPathSelectElement("/session/data/CurrentTransactionType").Value;
-
-            // Convert Json to string
-            string jsonData = JsonSerializer.Serialize(flatData);
-
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
                 "Bearer", access_token);
 
-                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                var content = new StringContent(storedData, Encoding.UTF8, "application/json");
 
                 var response = await client.PostAsync($"{_serviceNowUrl}/api/now/table/incident", content);
 
