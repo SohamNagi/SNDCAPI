@@ -31,8 +31,6 @@ public class IncidentController : ControllerBase
         {
             HttpContext.Session.SetString("StoredXml", reader.ReadToEndAsync().Result);
         }
-
-
         // Construct the OAuth URL with necessary parameters
         var state = RandomString(5); // Generating a unique state value for each request for CSRF protection
         var redirectUri = "https://webhook.site/fd6dbc2a-9926-4d94-b393-cb17912c9ef6";
