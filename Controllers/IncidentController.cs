@@ -27,9 +27,11 @@ public class IncidentController : ControllerBase
     [HttpPost]
     public IActionResult AcceptIncident()
     {
-        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+        // Read, Parse and Store Body Data in Session
+        using (StreamReader streamReader = new StreamReader("/Users/sohamnagi/Projects/SNDCAPI/data/data.xml", Encoding.UTF8))
         {
-            string xmldata = reader.ReadToEndAsync().Result;
+            string xmldata = streamReader.ReadToEnd();
+
             FormData flatData = new FormData();
             // Create an XDocument
             XDocument xmlDoc = XDocument.Parse(xmldata);
@@ -85,7 +87,7 @@ public class IncidentController : ControllerBase
                 {
                     var responseBody = await response.Content.ReadAsStringAsync();
                     var incident = JsonSerializer.Deserialize<jsonRoot>(responseBody);
-                    return Ok($"{_serviceNowUrl}{"/nav_to.do?uri=incident.do?sysparm_query=number%3D"}{incident.result.number}");
+                    return Redirect($"{_serviceNowUrl}{"/nav_to.do?uri=incident.do?sysparm_query=number%3D"}{incident.result.number}");
                 }
                 else
                 {
