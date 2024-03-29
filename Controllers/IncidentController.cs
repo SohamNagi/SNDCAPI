@@ -10,11 +10,6 @@ namespace SNDCAPI.Controllers;
 [Route("[controller]")]
 public class IncidentController : ControllerBase
 {
-
-    private static Random random = new Random();
-    public static string RandomString(int length) =>
-        new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", length)
-                              .Select(s => s[random.Next(s.Length)]).ToArray());
     private readonly string _serviceNowUrl;
     private readonly string _clientID;
 
@@ -25,16 +20,19 @@ public class IncidentController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult AcceptIncident()
+    public async Task<IActionResult> CreateIncident(string access_token)
     {
+        string jsonData;
+
         // Read, Parse and Store Body Data in Session
-        using (StreamReader streamReader = new StreamReader("/Users/sohamnagi/Projects/SNDCAPI/data/data.xml", Encoding.UTF8))
+        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
-            string xmldata = streamReader.ReadToEnd();
+            string xmldata = reader.ReadToEndAsync().Result;
 
             FormData flatData = new FormData();
             // Create an XDocument
             XDocument xmlDoc = XDocument.Parse(xmldata);
+            flatData.u_application = "Wave";
             flatData.u_brand = xmlDoc.XPathSelectElement("/session/data/policy/BrandFlag").Value;
             flatData.u_policynumber = xmlDoc.XPathSelectElement("session/data/policy/PolicyNumber").Value;
             flatData.u_caseid = xmlDoc.XPathSelectElement("session/data/policy/WorkbenchCaseId").Value;
@@ -43,35 +41,9 @@ public class IncidentController : ControllerBase
             flatData.u_transaction = xmlDoc.XPathSelectElement("/session/data/CurrentTransactionType").Value;
 
             // Convert Json to string
-            string jsonData = JsonSerializer.Serialize(flatData);
-            HttpContext.Session.SetString("StoredData", jsonData);
+            jsonData = JsonSerializer.Serialize(flatData);
         }
 
-        // Construct the OAuth URL with necessary parameters
-        var state = RandomString(5); // Generating a unique state value for each request for CSRF protection
-        var redirectUri = "https://localhost:7185/swagger/index.html";
-        var authorizationUrl = $"{_serviceNowUrl}/oauth_auth.do?response_type=token&client_id={_clientID}&redirect_uri={redirectUri}&state={state}";
-
-        // Store state in session for future verification
-        HttpContext.Session.SetString("State", state);
-
-        // Redirect the user to the OAuth provider's authorization page
-        return Ok(authorizationUrl);
-    }
-
-    [HttpGet("OAuthCallback")]
-    public async Task<IActionResult> OAuthCallback(string access_token, string state)
-    {
-        // Validate the 'state' parameter
-        if (state != HttpContext.Session.GetString("State"))
-        {
-            return StatusCode(999, "State Mismatch");
-        }
-
-        // Retrieve any stored session data
-        var storedData = HttpContext.Session.GetString("StoredData");
-
-        // Using the access token to make Table API call
         try
         {
             using (var client = new HttpClient())
@@ -79,7 +51,7 @@ public class IncidentController : ControllerBase
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
                 "Bearer", access_token);
 
-                var content = new StringContent(storedData, Encoding.UTF8, "application/json");
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
                 var response = await client.PostAsync($"{_serviceNowUrl}/api/now/table/incident", content);
 
@@ -87,7 +59,7 @@ public class IncidentController : ControllerBase
                 {
                     var responseBody = await response.Content.ReadAsStringAsync();
                     var incident = JsonSerializer.Deserialize<jsonRoot>(responseBody);
-                    return Redirect($"{_serviceNowUrl}{"/nav_to.do?uri=incident.do?sysparm_query=number%3D"}{incident.result.number}");
+                    return Ok($"{_serviceNowUrl}{"/nav_to.do?uri=incident.do?sysparm_query=number%3D"}{incident.result.number}");
                 }
                 else
                 {

@@ -38,7 +38,7 @@ public class policy
 
 public class FormData
 {
-    public const string u_application = "Wave";
+    public string u_application { get; set; }
     public string u_policynumber { get; set; }
     public string u_caseid { get; set; }
     public string u_brand { get; set; }
