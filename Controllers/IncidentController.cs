@@ -12,15 +12,19 @@ public class IncidentController : ControllerBase
 {
     private readonly string _serviceNowUrl;
     private readonly string _clientID;
+    private readonly string _username;
+    private readonly string _password;
 
     public IncidentController(IConfiguration configuration)
     {
         _serviceNowUrl = configuration["ServiceNowUrl"]!;
         _clientID = configuration["clientId"]!;
+        _username = configuration["Username"]!;
+        _password = configuration["Password"]!;
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateIncident(string access_token)
+    public async Task<IActionResult> CreateIncident()
     {
         string jsonData;
 
@@ -49,7 +53,7 @@ public class IncidentController : ControllerBase
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
-                "Bearer", access_token);
+               "Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_username}:{_password}")));
 
                 var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
